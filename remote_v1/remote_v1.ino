@@ -31,7 +31,7 @@ int PinLED1 = 9;
 int PinLED2 = 7;
 int PinLED3 = 6;
 int PinLED4 = 5;
-int PinLED5 = 9; // Analog!?!?!?!
+int PinLED5 = A5; // Analog 5 because can't use digital 1 or 0
 
 int BatteryButton = 4;
 int ModeButton = 2;
@@ -240,19 +240,24 @@ void TurnOff()
 void setup() 
 {
   Serial.begin(9600);
-  for (int thisPin = 9; thisPin < 14; thisPin++) 
-    {
-    pinMode(thisPin, OUTPUT);
-    }
-  for (int thisPin = 5; thisPin < 7; thisPin++) 
-    {
-    pinMode(thisPin, INPUT);
-    }
+
+  // set led pins to output
+  pinMode(PinLED1, OUTPUT);
+  pinMode(PinLED2, OUTPUT);
+  pinMode(PinLED3, OUTPUT);
+  pinMode(PinLED4, OUTPUT);
+  
+  pinMode(PinLED5, OUTPUT); // analog setup
+
+  // input buttons
+  pinMode(BatteryButton, INPUT); 
+  pinMode(ModeButton, INPUT); 
+  
 }
 
 void loop()
 {
-  if (digitalRead(BatteryButton)==HIGH)
+  if (digitalRead(BatteryButton) == HIGH)
   {
     Serial.print("YOU PRESSED THE BATTERY BUTTON");
     Serial.print('\n');
@@ -261,7 +266,7 @@ void loop()
     DispBattery();
     //delay(2000);
   }
-  if (digitalRead(ModeButton)==HIGH)
+  if (digitalRead(ModeButton) == HIGH)
   { 
     Serial.print("YOU PRESSED THE MODE BUTTON");
     Serial.print('\n');
