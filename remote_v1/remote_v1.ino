@@ -64,6 +64,8 @@ void MODE()
   }
 }
 
+
+// function to display mode LEDs
 void ModeDisplay(){
    switch (RiderMode)
    {
