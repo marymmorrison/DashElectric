@@ -1,41 +1,96 @@
 #include <SPI.h>
 #include <RH_NRF24.h>
 
+int PinLED1 = 13;
+int PinLED2 = 12;
+int PinLED3 = 11;
+int PinLED4 = 10;
+int PinLED5 = 9;
+int BatteryButton = 6;
+int ModeButton = 5;
 int RiderMode = 1;
-int powerPin = A0; // for the potentiometer
 
 // Singleton instance of the radio driver
 RH_NRF24 nrf24;
 
-void setup() 
+void MODE()
 {
-  Serial.begin(9600);   //sets data rate in bits/second
-  while (!Serial); // wait for serial port to connect. Needed for Leonardo only ... ! signifies "not"
-  
-  if (!nrf24.init())      //waits for radio driver (declared by code above aka receiver) to initialize
-    {Serial.println("init failed");}  //if radio driver fails, prints error message
-  
-  // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-  if (!nrf24.setChannel(1))
-    {Serial.println("setChannel failed");}
-  
-  if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
-    {Serial.println("setRF failed");}
+  ModeDisplay();
+  delay(1000);
+  long timev = millis();
+  Serial.print("Currenttime:");
+  Serial.print(timev);
+  Serial.print('\n');
+  while ( millis() < timev + (2000)){
+          if (digitalRead(ModeButton)==HIGH)
+          { 
+          Serial.print("YOU DOUBLE PRESSED THE MODE BUTTON");
+          Serial.print('\n');
+          ModeChange();
+          ModeDisplay();
+          delay(500);
+          }
+  }
 }
 
-void StoreMode(String mode)
-{
-  // convert mode from string to int
-  // set equal to global mode 
-  RiderMode = mode.toInt();
+void ModeDisplay(){
+   switch (RiderMode)
+   {
+      case 1:
+        digitalWrite(PinLED1, LOW);
+        digitalWrite(PinLED2, LOW);
+        digitalWrite(PinLED3, LOW);
+        digitalWrite(PinLED4, HIGH);
+        Serial.print("Rider Mode 1");
+        Serial.print('\n');
+        break;
+      case 2:
+        digitalWrite(PinLED1, LOW);
+        digitalWrite(PinLED2, LOW);
+        digitalWrite(PinLED3, HIGH);
+        digitalWrite(PinLED4, LOW);
+        Serial.print("Rider Mode 2");
+        Serial.print('\n');
+        break;
+      case 3:
+        digitalWrite(PinLED1, LOW);
+        digitalWrite(PinLED2, HIGH);
+        digitalWrite(PinLED3, LOW);
+        digitalWrite(PinLED4, LOW);
+        Serial.print("Rider Mode 3");
+        Serial.print('\n');
+        break;
+    }
+  
 }
 
-int ReadBattery()
-{
-  if (Serial.available() > 0) {
-    // replace the analog read for the passing of the current power value into the function Battery
-    // check if A0 is the battery pin
-    double Power = analogRead(powerPin);
+void ModeChange(){
+  if (RiderMode == 1)
+  {
+  RiderMode = 2;
+  Serial.print("NEW RIDER MODE:");
+  Serial.print(RiderMode);
+  Serial.print('\n');
+  }
+  else if (RiderMode == 2)
+  {
+  RiderMode = 3;
+  Serial.print("NEW RIDER MODE:");
+  Serial.print(RiderMode);
+  Serial.print('\n');
+  }
+  else if (RiderMode == 3)
+  {   
+  Serial.print("NEW RIDER MODE:");
+  Serial.print(RiderMode);
+  Serial.print('\n');  
+  RiderMode = 1;
+  }
+}
+
+void Battery(){
+if (Serial.available() > 0) {
+    double Power = analogRead(A0);// replace the analog read for the passing of the current power value into the function Battery
     Serial.print("Power: "); 
     Serial.print(Power);
     Serial.print('\n');
@@ -43,171 +98,98 @@ int ReadBattery()
     Serial.print("Percent: "); 
     Serial.print(PercentPower);
     Serial.print('\n');
-
-    // declare integer for battery case
-        // 0 = default (error)
-        // 1 is <= 25%
-        // 2 is btwn 25 and 50%
-        // 3 is btwn 50 and 75%
-        // 4 is btwn 75 and 100%
-        
-    int batCase = 0;
-    
-    if (PercentPower <= 25)
+    if (PercentPower <= 5)
     {
-        batCase = 1;
-        Serial.print("Battery Power: Case 1");
+        digitalWrite(PinLED1, LOW);
+        digitalWrite(PinLED2, LOW);
+        digitalWrite(PinLED3, LOW);
+        digitalWrite(PinLED4, LOW);
+        Serial.print("CASE0");
+        Serial.print('\n');
+      
+    }
+    else if ( 5 < PercentPower && PercentPower <= 25)
+    {
+        digitalWrite(PinLED1, HIGH);
+        digitalWrite(PinLED2, LOW);
+        digitalWrite(PinLED3, LOW);
+        digitalWrite(PinLED4, LOW);
+        Serial.print("CASE1");
         Serial.print('\n');
         
     }
     else if (25 < PercentPower && PercentPower <= 50 )
     {
-        batCase = 2;
-        Serial.print("Battery Power: Case 2");
+        digitalWrite(PinLED1, HIGH);
+        digitalWrite(PinLED2, HIGH);
+        digitalWrite(PinLED3, LOW);
+        digitalWrite(PinLED4, LOW);
+        Serial.print("CASE2");
         Serial.print('\n');
         
     }
     else if (50 < PercentPower && PercentPower <= 75)
     {
-        batCase = 3;
-        Serial.print("Battery Power: Case 3");
+        digitalWrite(PinLED1, HIGH);
+        digitalWrite(PinLED2, HIGH);
+        digitalWrite(PinLED3, HIGH);
+        digitalWrite(PinLED4, LOW);
+        Serial.print("CASE3");
         Serial.print('\n');
       
     }
     else if (75 < PercentPower && PercentPower <= 100)
     {
-        batCase = 4;;
-        Serial.print("Battery Power: Case 4");
+        digitalWrite(PinLED1, HIGH);
+        digitalWrite(PinLED2, HIGH);
+        digitalWrite(PinLED3, HIGH);
+        digitalWrite(PinLED4, HIGH);
+        Serial.print("CASE4");
         Serial.print('\n');
     }
-
-    // Saif note to himself/Hector: I think a more elegant way to do the above is:
-    // I will change this later after testing - Saif
-    /*
-     * int case = PercentPower%25 + 1;
-     */
-     
-    return batCase;
-  }
-    
+}
 }
 
-
-void SendBattery()
-{ 
-  // read battery level
-  int batteryCase = ReadBattery();
-
-  // send message based off of what was read
-  switch (batteryCase){
-    case 0:
-    {
-      // this is an error case, means the battery percent is a weird number
-      uint8_t data[] = "$SendBat:0;";
-      Serial.println("Sending: ");
-      Serial.print((char*)data);
-      nrf24.send(data, sizeof(data));
-      nrf24.waitPacketSent();
-      break;
-    }
-    case 1:
-    {
-      uint8_t data[] = "$SendBat:1;";
-      Serial.println("Sending: ");
-      Serial.print((char*)data);
-      nrf24.send(data, sizeof(data));
-      nrf24.waitPacketSent();
-      break;
-    }
-    case 2:
-    {
-      uint8_t data[] = "$SendBat:2;";
-      Serial.println("Sending: ");
-      Serial.print((char*)data);
-      nrf24.send(data, sizeof(data));
-      nrf24.waitPacketSent();
-      break;
-    }
-    case 3:
-    {
-      uint8_t data[] = "$SendBat:3;";
-      Serial.println("Sending: ");
-      Serial.print((char*)data);
-      nrf24.send(data, sizeof(data));
-      nrf24.waitPacketSent();
-      break;
-    }
-    case 4:
-    {
-      uint8_t data[] = "$SendBat:4;";
-      Serial.println("Sending: ");
-      Serial.print((char*)data);
-      nrf24.send(data, sizeof(data));
-      nrf24.waitPacketSent();
-      break;
-    }
- 
-  } // end of switch case
-
-}
-
-// reads a message if it is available
-// sends code to either send battery or store mode
-void getMessage()
+void TurnOff()
 {
-  if (nrf24.available())
-  {
-    // Should be a message for us now   
-    uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
-    uint8_t len = sizeof(buf);
-    if (nrf24.recv(buf, &len))
+   digitalWrite(PinLED1, LOW);
+   digitalWrite(PinLED2, LOW);
+   digitalWrite(PinLED3, LOW);
+   digitalWrite(PinLED4, LOW);
+   digitalWrite(PinLED5, LOW);
+
+}
+
+
+void setup() 
+{
+  Serial.begin(9600);
+  for (int thisPin = 9; thisPin < 14; thisPin++) 
     {
-      // print request received
-      Serial.print("Got Request: ");
-      String readString = (char*)buf;
-      Serial.println(readString);
-
-      int ind1, ind2, ind3;
-
-      // get indicies for characters that separate messages
-      // Message should look like: 
-          // $command:argument;
-          
-      ind1 = readString.indexOf('$');
-      ind2 = readString.indexOf(':');
-      ind3 = readString.indexOf(';'); 
-
-      // store what the message says
-      String command, argument;
-      command = readString.substring(ind1+1, ind2);
-      argument = readString.substring(ind2+1, ind3);
-
-      // run specific commands
-      
-        if (command == "GetBat"){
-          SendBattery();
-        }
-        else if(command == "SendMode")
-        {
-          StoreMode(argument);
-        }
-        else {
-          Serial.println("Command Given: ");
-          Serial.print(command);
-          Serial.println("Error: Command does not match known commands."); 
-        }
-        
-      // end of running specific commands
-      
+    pinMode(thisPin, OUTPUT);
     }
-  
-  }
-  
+  for (int thisPin = 5; thisPin < 7; thisPin++) 
+    {
+    pinMode(thisPin, INPUT);
+    }
 }
 
 void loop()
 {
-  getMessage();
+  if (digitalRead(BatteryButton)==HIGH)
+  {
+    Serial.print("YOU PRESSED THE BATTERY BUTTON");
+    Serial.print('\n');
+    Battery();
+    delay(2000);
+  }
+  if (digitalRead(ModeButton)==HIGH)
+  { 
+    Serial.print("YOU PRESSED THE MODE BUTTON");
+    Serial.print('\n');
+    MODE();
+  }
+  TurnOff(); 
 }
 
 
