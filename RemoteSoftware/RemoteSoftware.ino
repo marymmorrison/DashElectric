@@ -4,19 +4,28 @@
 #include "Pins.h"
 
 HardwareHandler handler;
+CommunicationHandler comm;
 Logger logger;
 
 void setup()
 {
         logger.init(9600);
         handler.init(logger);
+        comm.init();
         // input buttons
         pinMode(batteryButton, INPUT);
         pinMode(riderModeButton, INPUT);
+
+        logger.setDebugLevel(logger.VERBOSE);
 }
 
 void loop()
 {
+        // checks if any data in the buffer
+        if(comm.available())
+        {
+                comm.processCommand(); // processes a command
+        }
         if (digitalRead(batteryButton) == HIGH)
         {
                 logger.info("Battery button pressed.");
@@ -49,4 +58,4 @@ void loop()
    }*/
 
 
-   //void RequestBattery() "$GetBat:0;";
+//void RequestBattery() "$GetBat:0;";
