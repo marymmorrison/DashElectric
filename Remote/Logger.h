@@ -1,6 +1,7 @@
 /*
    Logger.h - Library for logging code correctly.
  */
+
 #ifndef Logger_h
 #define Logger_h
 
@@ -9,7 +10,7 @@
 class Logger
 {
 public:
-	Logger();
+	Logger(){};
 	void init(int baud) {
 		Serial.begin(baud);
 	}
