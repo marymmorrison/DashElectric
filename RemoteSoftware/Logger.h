@@ -18,25 +18,25 @@ public:
 
 	void verbose(String message) {
 		if (_debugLevel >= VERBOSE) {
-			Serial.println("VERBOSE:\t" + message);
+			Serial.println("[VERBOSE]\t" + message);
 		}
 	}
 
 	void info(String message) {
 		if (_debugLevel >= INFO) {
-			Serial.println(message);
+			Serial.println("[INFO]\t" + message);
 		}
 	}
 
 	void warn(String message) {
 		if (_debugLevel >= WARN) {
-			Serial.println(message);
+			Serial.println("[WARN]\t" + message);
 		}
 	}
 
 	void error(String message) {
 		if (_debugLevel >= ERROR) {
-			Serial.println(message);
+			Serial.println("[ERROR]\t" + message);
 		}
 	}
 
@@ -44,11 +44,12 @@ public:
 		_debugLevel = level;
 	}
 
+	int VERBOSE = 4;
+	int INFO = 3;
+	int WARN = 2;
+	int ERROR = 1;
 	int OFF = 0;
-	int VERBOSE = 1;
-	int INFO = 2;
-	int WARN = 3;
-	int ERROR = 4;
+
 private:
 	int _debugLevel;
 };
