@@ -10,14 +10,15 @@
 class Logger
 {
 public:
-	Logger(){};
+	Logger(){
+	};
 	void init(int baud) {
 		Serial.begin(baud);
 	}
 
 	void verbose(String message) {
 		if (_debugLevel >= VERBOSE) {
-			Serial.println(message);
+			Serial.println("VERBOSE:\t" + message);
 		}
 	}
 
