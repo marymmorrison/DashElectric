@@ -23,7 +23,7 @@ void MODE()
   Serial.print('\n');
   while ( millis() < timev + (2000)){
           if (digitalRead(ModeButton)==HIGH)
-          { 
+          {
           Serial.print("YOU DOUBLE PRESSED THE MODE BUTTON");
           Serial.print('\n');
           ModeChange();
@@ -61,7 +61,7 @@ void ModeDisplay(){
         Serial.print('\n');
         break;
     }
-  
+
 }
 
 void ModeChange(){
@@ -80,10 +80,10 @@ void ModeChange(){
   Serial.print('\n');
   }
   else if (RiderMode == 3)
-  {   
+  {
   Serial.print("NEW RIDER MODE:");
   Serial.print(RiderMode);
-  Serial.print('\n');  
+  Serial.print('\n');
   RiderMode = 1;
   }
 }
@@ -91,11 +91,11 @@ void ModeChange(){
 void Battery(){
 if (Serial.available() > 0) {
     double Power = analogRead(A0);// replace the analog read for the passing of the current power value into the function Battery
-    Serial.print("Power: "); 
+    Serial.print("Power: ");
     Serial.print(Power);
     Serial.print('\n');
     double PercentPower = (Power/1023.00)*100.00;
-    Serial.print("Percent: "); 
+    Serial.print("Percent: ");
     Serial.print(PercentPower);
     Serial.print('\n');
     if (PercentPower <= 5)
@@ -106,7 +106,7 @@ if (Serial.available() > 0) {
         digitalWrite(PinLED4, LOW);
         Serial.print("CASE0");
         Serial.print('\n');
-      
+
     }
     else if ( 5 < PercentPower && PercentPower <= 25)
     {
@@ -116,7 +116,7 @@ if (Serial.available() > 0) {
         digitalWrite(PinLED4, LOW);
         Serial.print("CASE1");
         Serial.print('\n');
-        
+
     }
     else if (25 < PercentPower && PercentPower <= 50 )
     {
@@ -126,7 +126,7 @@ if (Serial.available() > 0) {
         digitalWrite(PinLED4, LOW);
         Serial.print("CASE2");
         Serial.print('\n');
-        
+
     }
     else if (50 < PercentPower && PercentPower <= 75)
     {
@@ -136,7 +136,7 @@ if (Serial.available() > 0) {
         digitalWrite(PinLED4, LOW);
         Serial.print("CASE3");
         Serial.print('\n');
-      
+
     }
     else if (75 < PercentPower && PercentPower <= 100)
     {
@@ -161,14 +161,14 @@ void TurnOff()
 }
 
 
-void setup() 
+void setup()
 {
   Serial.begin(9600);
-  for (int thisPin = 9; thisPin < 14; thisPin++) 
+  for (int thisPin = 9; thisPin < 14; thisPin++)
     {
     pinMode(thisPin, OUTPUT);
     }
-  for (int thisPin = 5; thisPin < 7; thisPin++) 
+  for (int thisPin = 5; thisPin < 7; thisPin++)
     {
     pinMode(thisPin, INPUT);
     }
@@ -184,12 +184,10 @@ void loop()
     delay(2000);
   }
   if (digitalRead(ModeButton)==HIGH)
-  { 
+  {
     Serial.print("YOU PRESSED THE MODE BUTTON");
     Serial.print('\n');
     MODE();
   }
-  TurnOff(); 
+  TurnOff();
 }
-
-

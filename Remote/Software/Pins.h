@@ -8,6 +8,8 @@
 #define statusLED4 5
 #define powerLED 0
 
+#define LEDPins[] {statusLED1, statusLED2, statusLED3, statusLED4, powerLED}
+
 #define batteryButton 0 // pin ?
 #define riderModeButton 0 // pin ?
 

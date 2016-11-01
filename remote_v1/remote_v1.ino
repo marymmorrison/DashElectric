@@ -54,7 +54,7 @@ void MODE()
   Serial.print('\n');
   while ( millis() < timev + (2000)){
           if (digitalRead(ModeButton)==HIGH)
-          { 
+          {
           Serial.print("YOU DOUBLE PRESSED THE MODE BUTTON");
           Serial.print('\n');
           ModeChange();
@@ -70,35 +70,38 @@ void ModeDisplay(){
    switch (RiderMode)
    {
       case 1:
-        digitalWrite(PinLED1, LOW);
-        digitalWrite(PinLED2, LOW);
-        digitalWrite(PinLED3, LOW);
-        digitalWrite(PinLED4, HIGH);
+        //digitalWrite(PinLED1, LOW);
+        //digitalWrite(PinLED2, LOW);
+        //digitalWrite(PinLED3, LOW);
+        //digitalWrite(PinLED4, HIGH);
+        setMainPinLEDs(LOW, LOW, LOW, HIGH);
         Serial.print("Rider Mode 1");
         Serial.print('\n');
         break;
       case 2:
-        digitalWrite(PinLED1, LOW);
-        digitalWrite(PinLED2, LOW);
-        digitalWrite(PinLED3, HIGH);
-        digitalWrite(PinLED4, LOW);
+        setMainPinLEDs(LOW, LOW, HIGH, LOW);
+        //digitalWrite(PinLED1, LOW);
+        //digitalWrite(PinLED2, LOW);
+        //digitalWrite(PinLED3, HIGH);
+        //digitalWrite(PinLED4, LOW);
         Serial.print("Rider Mode 2");
         Serial.print('\n');
         break;
       case 3:
-        digitalWrite(PinLED1, LOW);
-        digitalWrite(PinLED2, HIGH);
-        digitalWrite(PinLED3, LOW);
-        digitalWrite(PinLED4, LOW);
+        setMainPinLEDs(LOW, HIGH, LOW, LOW);
+        //digitalWrite(PinLED1, LOW);
+        //digitalWrite(PinLED2, HIGH);
+        //digitalWrite(PinLED3, LOW);
+        //digitalWrite(PinLED4, LOW);
         Serial.print("Rider Mode 3");
         Serial.print('\n');
         break;
     }
-  
+
 }
 
 void ModeChange(){
-  
+
   if (RiderMode == 1)
   {
   RiderMode = 2;
@@ -129,10 +132,10 @@ void ModeChange(){
   }
   else if (RiderMode == 3)
   {
-  RiderMode = 1;   
+  RiderMode = 1;
   Serial.print("NEW RIDER MODE:");
   Serial.print(RiderMode);
-  Serial.print('\n');  
+  Serial.print('\n');
 
   // send mode
   uint8_t data[] = "$SendMode:1;";
@@ -140,48 +143,52 @@ void ModeChange(){
   Serial.print((char*)data);
   nrf24.send(data, sizeof(data));
   nrf24.waitPacketSent();
-  } 
-  
+  }
+
 } // end of ModeChange function
 
 void DispBattery(){
-  
+
     switch (BatteryLevel)
     {
       case 1:
-        digitalWrite(PinLED1, HIGH);
-        digitalWrite(PinLED2, LOW);
-        digitalWrite(PinLED3, LOW);
-        digitalWrite(PinLED4, LOW);
+        setMainPinLEDs(HIGH, LOW, LOW, LOW);
+        //digitalWrite(PinLED1, HIGH);
+        //digitalWrite(PinLED2, LOW);
+        //digitalWrite(PinLED3, LOW);
+        //digitalWrite(PinLED4, LOW);
         Serial.print("CASE1");
         Serial.print('\n');
         break;
       case 2:
-        digitalWrite(PinLED1, HIGH);
-        digitalWrite(PinLED2, HIGH);
-        digitalWrite(PinLED3, LOW);
-        digitalWrite(PinLED4, LOW);
+        setMainPinLEDs(HIGH, HIGH, LOW, LOW);
+        //digitalWrite(PinLED1, HIGH);
+        //digitalWrite(PinLED2, HIGH);
+        //digitalWrite(PinLED3, LOW);
+        //digitalWrite(PinLED4, LOW);
         Serial.print("CASE2");
         Serial.print('\n');
         break;
       case 3:
-        digitalWrite(PinLED1, HIGH);
-        digitalWrite(PinLED2, HIGH);
-        digitalWrite(PinLED3, HIGH);
-        digitalWrite(PinLED4, LOW);
+        setMainPinLEDs(HIGH, HIGH, HIGH, LOW);
+        //digitalWrite(PinLED1, HIGH);
+        //digitalWrite(PinLED2, HIGH);
+        //digitalWrite(PinLED3, HIGH);
+        //digitalWrite(PinLED4, LOW);
         Serial.print("CASE3");
         Serial.print('\n');
         break;
       case 4:
-        digitalWrite(PinLED1, HIGH);
-        digitalWrite(PinLED2, HIGH);
-        digitalWrite(PinLED3, HIGH);
-        digitalWrite(PinLED4, HIGH);
+        setMainPinLEDs(HIGH, HIGH, HIGH, HIGH);
+        //digitalWrite(PinLED1, HIGH);
+        //digitalWrite(PinLED2, HIGH);
+        //digitalWrite(PinLED3, HIGH);
+        //digitalWrite(PinLED4, HIGH);
         Serial.print("CASE4");
         Serial.print('\n');
         break;
     }
-    
+
 }
 
 void GetBattery()
@@ -190,7 +197,7 @@ void GetBattery()
   {
     uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
-    
+
     if (nrf24.recv(buf, &len))
     {
       // Variables for reading message
@@ -200,7 +207,7 @@ void GetBattery()
       // get indicies for characters that separate messages
       ind1 = readString.indexOf('$');
       ind2 = readString.indexOf(':');
-      ind3 = readString.indexOf(';'); 
+      ind3 = readString.indexOf(';');
 
       // print out command
       Serial.print(readString.substring(ind1+1, ind2));
@@ -212,11 +219,9 @@ void GetBattery()
       {
         BatteryLevel = readString.substring(ind2+1, ind3).toInt();
       }
-      
-    } // end of RECV
-    
-  } // end of NRF24 Available Loop
 
+    } // end of RECV
+  } // end of NRF24 Available Loop
 } // end of GetBattery
 
 void RequestBattery()
@@ -228,31 +233,45 @@ void RequestBattery()
   nrf24.waitPacketSent();
 }
 
-void TurnOff()
-{
-   digitalWrite(PinLED1, LOW);
-   digitalWrite(PinLED2, LOW);
-   digitalWrite(PinLED3, LOW);
-   digitalWrite(PinLED4, LOW);
-   digitalWrite(PinLED5, LOW);
+void setMainPinLEDs(bool one, bool two, bool three, bool four) {
+  digitalWrite(PinLEDs[0], one);
+  digitalWrite(PinLEDs[1], two);
+  digitalWrite(PinLEDs[2], three);
+  digitalWrite(PinLEDs[3], four);
 }
 
-void setup() 
+void TurnOff()
+{
+  for (int i = 0; i < 5; i++) { digitalWrite(pinLEDs[i], LOW); }
+  //  digitalWrite(PinLED1, LOW);
+  //  digitalWrite(PinLED2, LOW);
+  //  digitalWrite(PinLED3, LOW);
+  //  digitalWrite(PinLED4, LOW);
+  //  digitalWrite(PinLED5, LOW);
+}
+
+void setup()
 {
   Serial.begin(9600);
 
   // set led pins to output
-  pinMode(PinLED1, OUTPUT);
-  pinMode(PinLED2, OUTPUT);
-  pinMode(PinLED3, OUTPUT);
-  pinMode(PinLED4, OUTPUT);
-  
-  pinMode(PinLED5, OUTPUT); // analog setup
+  // pinMode(PinLED1, OUTPUT);
+  // pinMode(PinLED2, OUTPUT);
+  // pinMode(PinLED3, OUTPUT);
+  // pinMode(PinLED4, OUTPUT);
+  // pinMode(PinLED5, OUTPUT);
+
+  // pinMode(pinLEDs[0], OUTPUT);
+  // pinMode(pinLEDs[1], OUTPUT);
+  // pinMode(pinLEDs[2], OUTPUT);
+  // pinMode(pinLEDs[3], OUTPUT);
+  // pinMode(pinLEDs[4], OUTPUT);
+
+  for(int i = 0; i < 5; i++) { pinMode(pinLEDs[i], OUTPUT); }
 
   // input buttons
-  pinMode(BatteryButton, INPUT); 
-  pinMode(ModeButton, INPUT); 
-  
+  pinMode(BatteryButton, INPUT);
+  pinMode(ModeButton, INPUT);
 }
 
 void loop()
@@ -267,12 +286,10 @@ void loop()
     //delay(2000);
   }
   if (digitalRead(ModeButton) == HIGH)
-  { 
+  {
     Serial.print("YOU PRESSED THE MODE BUTTON");
     Serial.print('\n');
     MODE();
   }
-  TurnOff(); 
+  TurnOff();
 }
-
-
