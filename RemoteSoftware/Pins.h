@@ -10,5 +10,6 @@
 
 #define batteryButton 0 // pin ?
 #define riderModeButton 0 // pin ?
+#define nrf24Interrupt 0 // pin ?
 
 #endif
