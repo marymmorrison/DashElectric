@@ -7,6 +7,9 @@ HardwareHandler handler;
 CommunicationHandler comm;
 Logger logger;
 
+String buffer[16]; // Volatile ??
+volatile int bufferIndex = 0;
+
 void setup()
 {
         logger.init(9600);
@@ -16,24 +19,39 @@ void setup()
         pinMode(batteryButton, INPUT);
         pinMode(riderModeButton, INPUT);
 
+        // setup interrupts
+        attachInterrupt(digitalPinToInterrupt(nrf24Interrupt), interruptServiceRoutine, CHANGE);
+
         logger.setDebugLevel(logger.VERBOSE);
 }
 
 void loop()
 {
         // checks if any data in the buffer
-        if(comm.available())
-        {
-                comm.processCommand(); // processes a command
+        if(bufferIndex > 0) {
+                String msg = String(buffer[bufferIndex][0]);
+                buffer[bufferIndex] = "";
+                bufferIndex--;
+                comm.processMessage(msg); // processes a command
         }
-        if (digitalRead(batteryButton) == HIGH)
-        {
+        if (digitalRead(batteryButton) == HIGH) {
                 logger.info("Battery button pressed.");
         }
-        if (digitalRead(riderModeButton) == HIGH)
-        {
+        if (digitalRead(riderModeButton) == HIGH) {
                 logger.info("Rider mode button pressed.");
         }
+}
+
+void interruptServiceRoutine() {
+        String message = comm.receive();
+        //if(message.length() == 0) return;
+        if(bufferIndex < sizeof(buffer)) {
+                buffer[bufferIndex] = message;
+                bufferIndex++;
+        } else {
+                logger.error("Buffer overflow from communication ISR!");
+        }
+        logger.info("Message received: " + message);
 }
 
 
