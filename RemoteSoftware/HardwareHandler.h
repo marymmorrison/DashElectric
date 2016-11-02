@@ -8,14 +8,15 @@
 class HardwareHandler
 {
 public:
-	HardwareHandler(){};
+	HardwareHandler(){
+	};
 
 	void init(Logger l) {
 		// set led pins to output
 		pinMode(statusLED1, OUTPUT);
-		pinMode(statusLED1, OUTPUT);
-		pinMode(statusLED1, OUTPUT);
-		pinMode(statusLED1, OUTPUT);
+		pinMode(statusLED2, OUTPUT);
+		pinMode(statusLED3, OUTPUT);
+		pinMode(statusLED4, OUTPUT);
 
 		logger = l;
 	}
@@ -62,7 +63,7 @@ public:
 		if(value >= 0 && value <= 100)
 		{
 			batteryLevel = value;
-			logger.info("Battery level changed: " + value); \
+			logger.info("Battery level changed: " + value);
 		}
 		else
 		{

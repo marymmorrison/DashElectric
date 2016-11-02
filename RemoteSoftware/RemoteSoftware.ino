@@ -20,7 +20,7 @@ void setup()
         pinMode(riderModeButton, INPUT);
 
         // setup interrupts
-        attachInterrupt(digitalPinToInterrupt(nrf24Interrupt), interruptServiceRoutine, CHANGE);
+        attachInterrupt(digitalPinToInterrupt(nrf24Interrupt), interruptServiceRoutine, RISING);
 
         logger.setDebugLevel(logger.VERBOSE);
 }
@@ -29,7 +29,7 @@ void loop()
 {
         // checks if any data in the buffer
         if(bufferIndex > 0) {
-                String msg = String(buffer[bufferIndex][0]);
+                String msg = String(buffer[bufferIndex]);
                 buffer[bufferIndex] = "";
                 bufferIndex--;
                 comm.processMessage(msg); // processes a command
