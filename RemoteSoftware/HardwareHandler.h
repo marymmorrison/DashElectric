@@ -81,9 +81,33 @@ public:
 		digitalWrite(statusLED4, LOW);
 	}
 
+  bool checkBatteryButton() {
+    if (digitalRead(batteryButton) == HIGH) {
+          battery_counter++;
+          if(battery_counter > 3000) {
+                  displayBatteryLevel();
+                  //Serial.println("Battery pushed!");
+                  battery_counter = 65000;
+                  if(!batterySent) {
+                    batterySent = true;
+                    return true;
+                  }
+          }
+      } else {
+          if(battery_counter > 0 ) {
+                  battery_counter--;
+          } else {
+                  turnOffStatusLEDs();
+                  batterySent = false;
+          }
+      }
+      return false;
+  }
 private:
-	int batteryLevel = 100;
-	int riderMode;
+	short batteryLevel = 100;
+	short riderMode;
+  bool batterySent = false;
+  unsigned int battery_counter = 0;
 
 	Logger logger;
 };

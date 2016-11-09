@@ -8,7 +8,7 @@ CommunicationHandler comm;
 Logger logger;
 
 short status = 0;
-unsigned int battery_counter = 0;
+short speed = 0;
 short mode_counter = 0;
 
 void processMessage();
@@ -34,19 +34,8 @@ void loop()
                 if(comm.receive()) {
                         processMessage();
                 }
-                if (digitalRead(batteryButton) == HIGH) {
-                        battery_counter++;
-                        if(battery_counter > 3000) {
-                                handler.displayBatteryLevel();
-                                Serial.println("Battery pushed!");
-                                battery_counter = 65000;
-                        }
-                } else {
-                        if(battery_counter > 0 ) {
-                                battery_counter--;
-                        } else {
-                                handler.turnOffStatusLEDs();
-                        }
+                if(handler.checkBatteryButton()){
+                  comm.sendMessage("GETBAT", "0");
                 }
                 if (digitalRead(riderModeButton) == HIGH) {
                         mode_counter++;
@@ -57,15 +46,19 @@ void loop()
                 } else {
                         mode_counter = 0;
                 }
+                
+                double speedIn = analogRead(A0);
+                speed = map(speedIn, 0, 1023, 0, 100);
         }
-        comm.sendMessage("SPEED", String(status));
+        comm.sendMessage("SPEED", String(speed));
 }
 
 void processMessage() {
         String cmd = comm.getCommand();
         if(cmd.equals("STATUS")) {
                 Serial.println("Logic board is good!");
-        } else {
+        } else if(cmd.equals("ACK")) {
+        }  else {
                 Serial.print("Unknown command - ");
                 Serial.println(cmd);
         }
