@@ -31,7 +31,7 @@ int PinLED1 = 9;
 int PinLED2 = 7;
 int PinLED3 = 6;
 int PinLED4 = 5;
-int PinLED5 = A5; // Analog 5 because can't use digital 1 or 0
+int PinLED5 = A5; 
 
 int BatteryButton = 4;
 int ModeButton = 3;
@@ -39,11 +39,16 @@ int ModeButton = 3;
 
 // variables to display
 int RiderMode = 1;
-int BatteryLevel = 4; // 4 = max, 1 = min
+int BatteryLevel = 4; // 4 = max, 1 = min, 0 = error
 
 // Singleton instance of the radio driver
 RH_NRF24 nrf24;
 
+// Is run when the Mode Button is pressed
+// First, prints the MODE LEDs for the current Mode
+// Checks to see if the user presses the button twice
+      // if the button is pressed twice, then change the mode
+      // then, display the new mode
 void MODE()
 {
   ModeDisplay();
@@ -64,8 +69,7 @@ void MODE()
   }
 }
 
-
-// function to display mode LEDs
+// displays LEDs to signify the Current MODE
 void ModeDisplay(){
    switch (RiderMode)
    {
@@ -101,45 +105,45 @@ void ModeChange(){
   Serial.println("Change mode");
   if (RiderMode == 1)
   {
-  RiderMode = 2;
-  Serial.print("NEW RIDER MODE:");
-  Serial.print(RiderMode);
-  Serial.print('\n');
-
-  // send mode
-  uint8_t data[] = "$SendMode:2;";
-  Serial.println("Sending: ");
-  Serial.print((char*)data);
-  nrf24.send(data, sizeof(data));
-  nrf24.waitPacketSent();
+    RiderMode = 2;
+    Serial.print("NEW RIDER MODE:");
+    Serial.print(RiderMode);
+    Serial.print('\n');
+  
+    // send mode
+    uint8_t data[] = "$SendMode:2;";
+    Serial.println("Sending: ");
+    Serial.print((char*)data);
+    nrf24.send(data, sizeof(data));
+    nrf24.waitPacketSent();
   }
   else if (RiderMode == 2)
   {
-  RiderMode = 3;
-  Serial.print("NEW RIDER MODE:");
-  Serial.print(RiderMode);
-  Serial.print('\n');
-
-  // send mode
-  uint8_t data[] = "$SendMode:3;";
-  Serial.println("Sending: ");
-  Serial.print((char*)data);
-  nrf24.send(data, sizeof(data));
-  nrf24.waitPacketSent();
+    RiderMode = 3;
+    Serial.print("NEW RIDER MODE:");
+    Serial.print(RiderMode);
+    Serial.print('\n');
+  
+    // send mode
+    uint8_t data[] = "$SendMode:3;";
+    Serial.println("Sending: ");
+    Serial.print((char*)data);
+    nrf24.send(data, sizeof(data));
+    nrf24.waitPacketSent();
   }
   else if (RiderMode == 3)
   {
-  RiderMode = 1;   
-  Serial.print("NEW RIDER MODE:");
-  Serial.print(RiderMode);
-  Serial.print('\n');  
-
-  // send mode
-  uint8_t data[] = "$SendMode:1;";
-  Serial.println("Sending: ");
-  Serial.print((char*)data);
-  nrf24.send(data, sizeof(data));
-  nrf24.waitPacketSent();
+    RiderMode = 1;   
+    Serial.print("NEW RIDER MODE:");
+    Serial.print(RiderMode);
+    Serial.print('\n');  
+  
+    // send mode
+    uint8_t data[] = "$SendMode:1;";
+    Serial.println("Sending: ");
+    Serial.print((char*)data);
+    nrf24.send(data, sizeof(data));
+    nrf24.waitPacketSent();
   } 
   
 } // end of ModeChange function
@@ -148,6 +152,10 @@ void DispBattery(){
     Serial.println();
     switch (BatteryLevel)
     {
+      case 0:
+        Serial.print("CASE0: Error, did not read battery level correctly.");
+        Serial.print('\n');
+        break;
       case 1:
         digitalWrite(PinLED1, HIGH);
         digitalWrite(PinLED2, LOW);
@@ -186,16 +194,12 @@ void DispBattery(){
 
 void GetBattery()
 {
-<<<<<<< HEAD
   if (nrf24.waitAvailableTimeout(500)) // if the other transceiver doesnt reply fast enough, try   if (nrf24.waitAvailableTimeout(200)) 
-=======
-  if (nrf24.available())
->>>>>>> 7a4a761731b09bbe2cff43b410dc2156aecda4dd
   {
     uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
     
-    if (nrf24.recv(buf, &len))
+    if (nrf24.recv(buf, &len)) 
     {
       // Variables for reading message
       int ind1, ind2, ind3;
@@ -253,7 +257,7 @@ void TurnOff()
 void setup() 
 {
   Serial.begin(9600);
-
+  
   // set led pins to output
   pinMode(PinLED1, OUTPUT);
   pinMode(PinLED2, OUTPUT);
@@ -272,7 +276,6 @@ void setup()
   // input buttons
   pinMode(BatteryButton, INPUT); 
   pinMode(ModeButton, INPUT); 
-  
 }
 
 int batButtonState;             // the current reading from the input pin
@@ -281,7 +284,7 @@ int lastBatButtonState = LOW;   // the previous reading from the input pin
 long lastBatDebounceTime = 0;  // the last time the output pin was toggled
 long batDebounceDelay = 50;    // the debounce time; increase if the output flickers
 
-////////////////////////////////
+//////////////////////////////////
 
 int modeButtonState;             // the current reading from the input pin
 int lastModeButtonState = LOW;   // the previous reading from the input pin
@@ -290,7 +293,6 @@ long lastModeDebounceTime = 0;  // the last time the output pin was toggled
 long modeDebounceDelay = 50;    // the debounce time; increase if the output flickers
 
 void loop()
-<<<<<<< HEAD
 { 
   // button debounce for battery
   int reading = digitalRead(BatteryButton);
@@ -333,23 +335,6 @@ void loop()
   if (reading_mode != lastModeButtonState) {
     // reset the debouncing timer
     lastModeDebounceTime = millis();
-=======
-{
-  if (digitalRead(BatteryButton) == HIGH)
-  {
-    Serial.print("YOU PRESSED THE BATTERY BUTTON");
-    Serial.print('\n');
-    RequestBattery();
-    GetBattery();
-    DispBattery();
-    //delay(2000);
-  }
-  if (digitalRead(ModeButton) == HIGH)
-  { 
-    Serial.print("YOU PRESSED THE MODE BUTTON");
-    Serial.print('\n');
-    MODE();
->>>>>>> 7a4a761731b09bbe2cff43b410dc2156aecda4dd
   }
 
   if ((millis() - lastModeDebounceTime) > modeDebounceDelay) {
