@@ -8,8 +8,8 @@
 #define statusLED4 5
 #define powerLED 0
 
-#define batteryButton 0 // pin ?
-#define riderModeButton 0 // pin ?
+#define batteryButton 3 // pin ?
+#define riderModeButton 4 // pin ?
 #define nrf24Interrupt 0 // pin ?
 
 #endif

@@ -82,7 +82,7 @@ public:
 	}
 
 private:
-	int batteryLevel;
+	int batteryLevel = 100;
 	int riderMode;
 
 	Logger logger;
