@@ -8,8 +8,10 @@ CommunicationHandler comm;
 Logger logger;
 
 short status = 0;
-short battery_counter = 0;
+unsigned int battery_counter = 0;
 short mode_counter = 0;
+
+void processMessage();
 
 void setup()
 {
@@ -33,15 +35,14 @@ void loop()
                         processMessage();
                 }
                 if (digitalRead(batteryButton) == HIGH) {
-                        if(battery_counter < 4000) {
-                                battery_counter++;
-                                if(battery_counter > 3000) {
-                                        handler.displayBatteryLevel();
-                                        Serial.println("Battery pushed!");
-                                }
+                        battery_counter++;
+                        if(battery_counter > 3000) {
+                                handler.displayBatteryLevel();
+                                Serial.println("Battery pushed!");
+                                battery_counter = 65000;
                         }
                 } else {
-                        if(battery_counter >= 0 ) {
+                        if(battery_counter > 0 ) {
                                 battery_counter--;
                         } else {
                                 handler.turnOffStatusLEDs();
