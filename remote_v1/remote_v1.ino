@@ -34,7 +34,7 @@ int PinLED4 = 5;
 int PinLED5 = A5; 
 
 int BatteryButton = 4;
-int ModeButton = 2;
+int ModeButton = 3;
 // end of pin setup
 
 // variables to display
@@ -52,7 +52,7 @@ RH_NRF24 nrf24;
 void MODE()
 {
   ModeDisplay();
-  delay(1000);
+  delay(1000); // can you help with getting rid of delays @ MELLO
   long timev = millis();
   Serial.print("Currenttime:");
   Serial.print(timev);
@@ -102,7 +102,7 @@ void ModeDisplay(){
 }
 
 void ModeChange(){
-  
+  Serial.println("Change mode");
   if (RiderMode == 1)
   {
     RiderMode = 2;
@@ -149,7 +149,7 @@ void ModeChange(){
 } // end of ModeChange function
 
 void DispBattery(){
-  
+    Serial.println();
     switch (BatteryLevel)
     {
       case 0:
@@ -194,7 +194,7 @@ void DispBattery(){
 
 void GetBattery()
 {
-  if (nrf24.available()) // if the other transceiver doesnt reply fast enough, try   if (nrf24.waitAvailableTimeout(200)) 
+  if (nrf24.waitAvailableTimeout(500)) // if the other transceiver doesnt reply fast enough, try   if (nrf24.waitAvailableTimeout(200)) 
   {
     uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
     uint8_t len = sizeof(buf);
@@ -204,6 +204,9 @@ void GetBattery()
       // Variables for reading message
       int ind1, ind2, ind3;
       String readString = (char*)buf;
+
+      Serial.println("Recv");
+      Serial.print(readString);
 
       // get indicies for characters that separate messages
       ind1 = readString.indexOf('$');
@@ -222,6 +225,10 @@ void GetBattery()
       }
       
     } // end of RECV
+    else
+  {
+    Serial.println("didn't recv");
+  }
     
   } // end of NRF24 Available Loop
 
@@ -229,11 +236,13 @@ void GetBattery()
 
 void RequestBattery()
 {
+  Serial.println("Requesting Battery");
   uint8_t data[] = "$GetBat:0;";
   Serial.println("Sending: ");
   Serial.print((char*)data);
   nrf24.send(data, sizeof(data));
   nrf24.waitPacketSent();
+  Serial.println("Should have sent");
 }
 
 void TurnOff()
@@ -254,31 +263,102 @@ void setup()
   pinMode(PinLED2, OUTPUT);
   pinMode(PinLED3, OUTPUT);
   pinMode(PinLED4, OUTPUT);
-  
   pinMode(PinLED5, OUTPUT); // analog setup
 
+  if (!nrf24.init())
+    Serial.println("init failed");
+  // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
+  if (!nrf24.setChannel(1))
+    Serial.println("setChannel failed");
+  if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
+    Serial.println("setRF failed");  
+  
   // input buttons
   pinMode(BatteryButton, INPUT); 
   pinMode(ModeButton, INPUT); 
 }
 
+int batButtonState;             // the current reading from the input pin
+int lastBatButtonState = LOW;   // the previous reading from the input pin
+
+long lastBatDebounceTime = 0;  // the last time the output pin was toggled
+long batDebounceDelay = 50;    // the debounce time; increase if the output flickers
+
+////////////////////////////////
+
+int modeButtonState;             // the current reading from the input pin
+int lastModeButtonState = LOW;   // the previous reading from the input pin
+
+long lastModeDebounceTime = 0;  // the last time the output pin was toggled
+long modeDebounceDelay = 50;    // the debounce time; increase if the output flickers
+
 void loop()
-{
-  if (digitalRead(BatteryButton)==HIGH)
-  {
-    Serial.print("YOU PRESSED THE BATTERY BUTTON");
-    Serial.print('\n');
-    RequestBattery();
-    GetBattery();
-    DispBattery();
-    //delay(2000);
+{ 
+  // button debounce for battery
+  int reading = digitalRead(BatteryButton);
+  
+  if (reading != lastBatButtonState) {
+    // reset the debouncing timer
+    lastBatDebounceTime = millis();
   }
-  if (digitalRead(ModeButton)==HIGH)
-  { 
-    Serial.print("YOU PRESSED THE MODE BUTTON");
-    Serial.print('\n');
-    MODE();
+
+  if ((millis() - lastBatDebounceTime) > batDebounceDelay) {
+    // whatever the reading is at, it's been there for longer
+    // than the debounce delay, so take it as the actual current state:
+
+    // if the button state has changed:
+    if (reading != batButtonState) {
+      batButtonState = reading;
+
+      // only toggle the LED if the new button state is HIGH
+      if (batButtonState==HIGH)
+      {
+        Serial.println("BATTERY BUTTON\n");
+        RequestBattery();
+        GetBattery();
+        DispBattery();
+        delay(1500); // change this to use millis. Idk how to use millis yet.
+      }
+    }
+    
+  } // end of millis
+  lastBatButtonState = reading;
+
+  // end of button debounce for battery
+
+  // *******************************
+  // button debounce for mode
+  // *******************************
+  
+  int reading_mode = digitalRead(ModeButton);
+  
+  if (reading_mode != lastModeButtonState) {
+    // reset the debouncing timer
+    lastModeDebounceTime = millis();
   }
+
+  if ((millis() - lastModeDebounceTime) > modeDebounceDelay) {
+    // whatever the reading is at, it's been there for longer
+    // than the debounce delay, so take it as the actual current state:
+
+    // if the button state has changed:
+    if (reading_mode != modeButtonState) {
+      modeButtonState = reading_mode;
+
+      // only toggle the LED if the new button state is HIGH
+      if (modeButtonState==HIGH)
+      {
+        Serial.println("Mode BUTTON\n");
+        MODE();
+        delay(1500); // change this to use millis. Idk how to use millis yet.
+      }
+    }
+    
+  } // end of millis
+  lastModeButtonState = reading_mode;
+
+  // END OF MODE BUTTON STATE
+  
   TurnOff(); 
 }
 

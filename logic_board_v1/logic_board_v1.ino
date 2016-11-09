@@ -32,15 +32,18 @@ void StoreMode(String mode)
 
 int ReadBattery()
 {
-  if (Serial.available() > 0) {
+//  if (Serial.available() > 0) {
     // replace the analog read for the passing of the current power value into the function Battery
     // check if A0 is the battery pin
     double Power = analogRead(powerPin);
-    Serial.print("Power: "); 
+    
+    double PercentPower = map(Power, 0, 675, 0, 100);
+    
+    Serial.println("\nPower: "); 
     Serial.print(Power);
     Serial.print('\n');
-    double PercentPower = (Power/1023.00)*100.00;
-    Serial.print("Percent: "); 
+    //double PercentPower = (Power/1023.00)*100.00;
+    Serial.println("Percent: "); 
     Serial.print(PercentPower);
     Serial.print('\n');
 
@@ -76,7 +79,7 @@ int ReadBattery()
     }
     else if (75 < PercentPower && PercentPower <= 100)
     {
-        batCase = 4;;
+        batCase = 4;
         Serial.print("Battery Power: Case 4");
         Serial.print('\n');
     }
@@ -88,7 +91,11 @@ int ReadBattery()
      */
      
     return batCase;
-  }
+//  }
+//  else
+//  {
+//    Serial.println("Serial not Available");
+//  }
     
 }
 
@@ -155,7 +162,8 @@ void SendBattery()
 // sends code to either send battery or store mode
 void getMessage()
 {
-  if (nrf24.available())
+  
+  if (nrf24.waitAvailableTimeout(500))
   {
     // Should be a message for us now   
     uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
@@ -181,6 +189,10 @@ void getMessage()
       String command, argument;
       command = readString.substring(ind1+1, ind2);
       argument = readString.substring(ind2+1, ind3);
+      Serial.println("Command and argument received: ");
+      Serial.print(command);
+      Serial.print(", ");
+      Serial.print(argument);
 
       // run specific commands
       
