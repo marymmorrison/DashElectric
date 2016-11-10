@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 #include "Pins.h"
-#include "Logger.h"
+#include <Servo.h>
 
 class HardwareHandler
 {
@@ -11,36 +11,10 @@ public:
 	HardwareHandler(){
 	};
 
-	void init(Logger l) {
-		// set led pins to output
-		pinMode(statusLED1, OUTPUT);
-		pinMode(statusLED2, OUTPUT);
-		pinMode(statusLED3, OUTPUT);
-		pinMode(statusLED4, OUTPUT);
-
-		logger = l;
-	}
-
-// Displays rider mode on the LEDs
-	void displayRiderMode(int riderMode){
-		digitalWrite(statusLED1, riderMode == 1);
-		digitalWrite(statusLED2, riderMode == 2);
-		digitalWrite(statusLED3, riderMode == 3);
-		digitalWrite(statusLED4, riderMode == 4);
-
-		logger.verbose("Rider mode is " + riderMode);
-	}
-
-// Displays battery level on the LEDs
-	void displayBatteryLevel() {
-		int value = batteryLevel / 25; // NOT CORRECT - need to figure proper battery percentage algorithm
-
-		digitalWrite(statusLED1, value > 0);
-		digitalWrite(statusLED2, value > 1);
-		digitalWrite(statusLED3, value > 2);
-		digitalWrite(statusLED4, value > 3);
-
-		logger.verbose("Battery level: " + value);
+	void init() {
+    servo.attach(9); // pin the the Servo is connected to
+    servo.write(99);
+    delay(6000); // ESC needs a few seconds to initialize
 	}
 
 // Sets rider mode
@@ -52,8 +26,8 @@ public:
 		}
 		else
 		{
-			logger.error("Out of range exception!");
-			logger.error("\t Rider mode is " + value);
+			//logger.error("Out of range exception!");
+			//logger.error("\t Rider mode is " + value);
 		}
 		//"$SendMode:" + String.valueOf(RiderMode) + ";"
 	}
@@ -72,6 +46,74 @@ public:
 		}
 	}
 
+ void setSpeed(short s) {
+    speed = s;
+ }
+
+  void monitorSpeed() {
+    int potentioval = map(speed, 0, 100, 90, 140);
+        if (riderMode == 1) {
+                if (potentioval > 115) {
+                        potentioval = 115;
+                }
+                desired = potentioval;
+                if (abs(desired - currentspeed) > 3) {
+                        if ((desired - currentspeed) < 0) {
+                                accel = -.5; //for decceleration
+                        }
+                        else {
+                                accel = .5;
+                        }
+                }
+                else {
+                        accel = desired - currentspeed;
+                }
+                currentspeed = currentspeed + accel;
+                servo.write(currentspeed);
+        }
+
+        if (riderMode == 2) {
+                if (potentioval > 125)
+                {
+                        potentioval = 125;
+                }
+                desired = potentioval;
+                if (abs(desired - currentspeed) > 6) {
+                        if ((desired - currentspeed) < 0) {
+                                accel = -4; //for decceleration
+                        }
+                        else {
+                                accel = 4;
+                        }
+                }
+                else{
+                        accel = desired - currentspeed;
+                }
+                currentspeed = currentspeed + accel;
+                servo.write(currentspeed);
+        }
+
+        if (riderMode == 3) {
+                if (potentioval > 140)
+                {
+                        potentioval = 140;
+                }
+                desired = potentioval;
+                if (abs(desired - currentspeed) > 10) {
+                        if ((desired - currentspeed) < 0) {
+                                accel = -10; //for deceleration
+                        }
+                        else {
+                                accel = 10;
+                        }
+                } else {
+                        accel = desired - currentspeed;
+                }
+                currentspeed = currentspeed + accel;
+                servo.write(currentspeed);
+        }
+  }
+  
 	// Turns off all status LEDs
 	void turnOffStatusLEDs()
 	{
@@ -83,7 +125,13 @@ public:
 
 private:
 	int batteryLevel;
-	int riderMode;
+  short speed = 0;
+  int potentioval = 0;
+  float accel = 0;
+  float currentspeed = 90;
+  int desired = 0;
+  short riderMode = 1;
+  Servo servo;
 
 	Logger logger;
 };

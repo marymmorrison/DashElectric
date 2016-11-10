@@ -6,15 +6,19 @@ CommunicationHandler::CommunicationHandler() {
 bool CommunicationHandler::init() {
         if (!nrf24.init()) {//waits for radio driver (declared by code above aka receiver) to initialize
                 Serial.println("init failed"); //if radio driver fails, prints error message
+                return false;
         }
 
         if (!nrf24.setChannel(1)) { // Defaults after init are 2.4 GHz (channel 1), 2Mbps, 0dBm
                 Serial.println("setChannel failed");
+                return false;
         }
 
         if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm)) {
                 Serial.println("setRF failed");
+                return false;
         }
+        return true;
 }
 
 bool CommunicationHandler::receive() {
@@ -49,7 +53,7 @@ bool CommunicationHandler::receive() {
 
 void CommunicationHandler::sendMessage(String command, String argument) {
         String str = "$" + command + ":" + argument + ";";
-        uint8_t data[sizeof(str)];
+        uint8_t data[str.length() + 1];
         str.toCharArray((char*)data, sizeof(data));
         //logger.info("Sending: " + String((char*)data));
         nrf24.send(data, sizeof(data));
