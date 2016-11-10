@@ -58,7 +58,9 @@ void processMessage() {
         if(cmd.equals("STATUS")) {
                 Serial.println("Logic board is good!");
         } else if(cmd.equals("ACK")) {
-        }  else {
+        } else if(cmd.equals("BATLVL")) {
+          handler.setBatteryLevel(comm.getArgument().toInt());
+        } else {
                 Serial.print("Unknown command - ");
                 Serial.println(cmd);
         }
