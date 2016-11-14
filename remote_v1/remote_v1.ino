@@ -350,7 +350,7 @@ void loop()
       {
         Serial.println("Mode BUTTON\n");
         MODE();
-        delay(1500); // change this to use millis. Idk how to use millis yet.
+        delay(500); // change this to use millis. Idk how to use millis yet.
       }
     }
     

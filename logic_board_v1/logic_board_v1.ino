@@ -163,7 +163,7 @@ void SendBattery()
 void getMessage()
 {
   
-  if (nrf24.waitAvailableTimeout(500))
+  if (nrf24.waitAvailableTimeout(800))
   {
     // Should be a message for us now   
     uint8_t buf[RH_NRF24_MAX_MESSAGE_LEN];
@@ -171,7 +171,7 @@ void getMessage()
     if (nrf24.recv(buf, &len))
     {
       // print request received
-      Serial.print("Got Request: ");
+      Serial.println("Got Request: ");
       String readString = (char*)buf;
       Serial.println(readString);
 
