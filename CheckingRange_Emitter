@@ -1,0 +1,37 @@
+#include "CommunicationHandler.h"
+
+CommunicationHandler handler;
+
+int number = 0;
+int addition = 1;
+int hour=0;
+
+void processMessage();
+
+void setup() {
+  Serial.begin(9600);
+  while(!handler.init());
+}
+
+void loop() {
+
+number = number + addition;
+
+if((number%3600)==0){
+  number=0;
+  hour = hour +1;
+}
+
+handler.sendMessage("Test", number);
+
+Serial.write("Previous Number is ");
+Serial.print(number);
+Serial.write(" And the addition is ");
+Serial.print(addition);
+Serial.write(" And the hour is ");
+Serial.print(hour);
+Serial.write("\n"); 
+delay(500); //delay half second
+}
+
+}
