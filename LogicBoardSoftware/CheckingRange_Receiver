@@ -1,0 +1,29 @@
+#include "CommunicationHandler.h"
+
+CommunicationHandler handler;
+
+int receivedvalue = 0;
+int missednumbers = 0;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+ 
+if(handler.receive()) {
+  if(handler.getCommand()=="Test"){
+    if(receivedvalue + 1 == handler.getArgument().toInt()){
+        Serial.write("Receiving the value of ");
+        Serial.print(receivedvalue);
+    }
+  }
+}
+else{
+  missednumbers = missednumbers + 1;
+}
+
+receivedvalue = receivedvalue + 1;
+receivedvalue = receivedvalue%3600;
+  
+}
